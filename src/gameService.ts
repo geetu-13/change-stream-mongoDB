@@ -1,19 +1,19 @@
-import * as mongoDB from "mongodb";
+import {MongoClient, Db, Collection} from "mongodb";
 import * as dotenv from "dotenv";
 
-export const collections: { games?: mongoDB.Collection, gamesV2?: mongoDB.Collection } = {}
+export const collections: { games?: Collection, gamesV2?: Collection } = {}
+
+export const client: MongoClient = new MongoClient("mongodb+srv://test:test@cluster0.tolbz0l.mongodb.net/");
 
 export async function connectToDatabase () {
    dotenv.config();
 
-   const client: mongoDB.MongoClient = new mongoDB.MongoClient("<CONNECTION_STRING>");
-           
    await client.connect();
        
-   const db: mongoDB.Db = client.db("<DATABASE_NAME>");
+   const db: Db = client.db("ATLAS_SEARCH");
   
-   const gamesCollection: mongoDB.Collection = db.collection("<COLLECTION_NAME>");
-   const gamesCollectionV2: mongoDB.Collection = db.collection("<COLLECTION_NAME_V2>");
+   const gamesCollection: Collection = db.collection("game-v1");
+   const gamesCollectionV2: Collection = db.collection("game-v2");
 
    collections.games = gamesCollection;
    collections.gamesV2 = gamesCollectionV2; 
@@ -42,4 +42,12 @@ export async function connectToDatabase () {
             collections.gamesV2?.deleteOne(next.documentKey);
         }   
     });
+}
+
+
+export async function closeDatabaseConnection () {
+    if (client) {
+        await client.close();
+        console.log('MongoDB connection closed.');
+    }
 }
